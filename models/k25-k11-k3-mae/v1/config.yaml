@@ -1,0 +1,20 @@
+model_id: k25-k11-k3-mae
+version: v1
+architecture:
+  type: Conv1D
+  kernels: [25, 11, 3]
+  dense_layers: [256, 64, 250]
+  output_activation: linear
+training:
+  loss: MAE
+  input_scale: 0.001
+  training_bin_range: [0, 249]
+  epochs: 20
+  n_samples: 10000
+  materials: [Concrete, Steel, BPE]
+  input_features: [spectrum, thickness_scaled, density_scaled]
+  flux_scale: 2000000
+  output_transform: log10
+data:
+  input_spectrum: data/raw/spectra/TrackNet10_spectrum.dat
+  response_matrices: data/raw/response_matrices/

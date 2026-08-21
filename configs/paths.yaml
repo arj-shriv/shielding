@@ -1,0 +1,18 @@
+# Repository-relative path aliases.
+# Do NOT put machine-specific absolute paths here.
+# Resolved at runtime by src/shielding_ml/pipelines/paths.py
+
+data:
+  raw:        data/raw
+  reference:  data/reference
+  processed:  data/processed
+
+phits:
+  high_energy:  data/raw/phits/high_energy
+  low_energy:   data/raw/phits/low_energy
+  multilayer:   data/raw/phits/multilayer
+
+spectra:     data/raw/spectra
+models:      models
+runs:        runs
+reports:     reports

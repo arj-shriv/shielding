@@ -1,0 +1,53 @@
+Generating training data...
+xtrain shape: (252000, 250, 3)
+Loading model from /Users/arjun/Python_Codes_Refactored/shielding-ml/models/k51-k11-k3-mae-s1-bins50-240/v1/model.pkl
+Model: "sequential"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ Conv1D_0 (Conv1D)               │ (None, 250, 64)        │         9,856 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling1d (MaxPooling1D)    │ (None, 125, 64)        │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ Conv1D_1 (Conv1D)               │ (None, 125, 64)        │        45,120 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ max_pooling1d_1 (MaxPooling1D)  │ (None, 63, 64)         │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ Conv1D_2 (Conv1D)               │ (None, 63, 64)         │        12,352 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ flatten (Flatten)               │ (None, 4032)           │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ Dense_1 (Dense)                 │ (None, 256)            │     1,032,448 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ Dense_2 (Dense)                 │ (None, 64)             │        16,448 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense (Dense)                   │ (None, 250)            │        16,250 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 3,397,424 (12.96 MB)
+ Trainable params: 1,132,474 (4.32 MB)
+ Non-trainable params: 0 (0.00 B)
+ Optimizer params: 2,264,950 (8.64 MB)
+Continuing training for 10 epochs...
+Epoch 1/10
+5513/5513 - 45s - 8ms/step - loss: 0.0857 - mae: 0.0857 - mse: 0.0150 - val_loss: 0.0821 - val_mae: 0.0821 - val_mse: 0.0138
+Epoch 2/10
+5513/5513 - 45s - 8ms/step - loss: 0.0850 - mae: 0.0850 - mse: 0.0148 - val_loss: 0.0869 - val_mae: 0.0869 - val_mse: 0.0154
+Epoch 3/10
+5513/5513 - 44s - 8ms/step - loss: 0.0849 - mae: 0.0849 - mse: 0.0147 - val_loss: 0.0986 - val_mae: 0.0986 - val_mse: 0.0200
+Epoch 4/10
+5513/5513 - 44s - 8ms/step - loss: 0.0840 - mae: 0.0840 - mse: 0.0144 - val_loss: 0.0837 - val_mae: 0.0837 - val_mse: 0.0141
+Epoch 5/10
+5513/5513 - 49s - 9ms/step - loss: 0.0832 - mae: 0.0832 - mse: 0.0142 - val_loss: 0.0816 - val_mae: 0.0816 - val_mse: 0.0138
+Epoch 6/10
+5513/5513 - 49s - 9ms/step - loss: 0.0827 - mae: 0.0827 - mse: 0.0140 - val_loss: 0.0802 - val_mae: 0.0802 - val_mse: 0.0131
+Epoch 7/10
+5513/5513 - 52s - 9ms/step - loss: 0.0827 - mae: 0.0827 - mse: 0.0140 - val_loss: 0.0837 - val_mae: 0.0837 - val_mse: 0.0143
+Epoch 8/10
+5513/5513 - 52s - 9ms/step - loss: 0.0820 - mae: 0.0820 - mse: 0.0138 - val_loss: 0.0869 - val_mae: 0.0869 - val_mse: 0.0158
+Epoch 9/10
+5513/5513 - 45s - 8ms/step - loss: 0.0815 - mae: 0.0815 - mse: 0.0136 - val_loss: 0.0800 - val_mae: 0.0800 - val_mse: 0.0131
+Epoch 10/10
+5513/5513 - 47s - 8ms/step - loss: 0.0816 - mae: 0.0816 - mse: 0.0136 - val_loss: 0.0816 - val_mae: 0.0816 - val_mse: 0.0135
+Saved → /Users/arjun/Python_Codes_Refactored/shielding-ml/models/k51-k11-k3-mae-s1-bins50-240/v1/model.pkl
+Final  train mae=0.0816  val_mae=0.0816
+Best   val_mae=0.0800

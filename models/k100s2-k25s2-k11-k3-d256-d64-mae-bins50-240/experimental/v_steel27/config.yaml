@@ -1,0 +1,11 @@
+architecture:
+  kernels: [100, 25, 11, 3]
+  strides: [2, 2, 1, 1]
+  dense: [256, 64]
+
+training:
+  loss: mae
+  input_scale: 0.001
+  bins: [50, 240]
+  epochs: 25
+  source_spectrum: steel27

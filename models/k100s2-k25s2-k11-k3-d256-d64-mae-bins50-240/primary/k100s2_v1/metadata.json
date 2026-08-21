@@ -1,0 +1,7 @@
+{
+  "val_mae": 0.0978,
+  "val_mse": 0.0255,
+  "n_params": 457914,
+  "epochs_trained": 45,
+  "notes": "4-layer: k100s2->MaxPool->k25s2->MaxPool->k11->k3. Still converging at ep35."
+}

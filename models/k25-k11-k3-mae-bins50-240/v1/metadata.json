@@ -1,0 +1,9 @@
+{
+  "model_id": "k25-k11-k3-mae-bins50-240",
+  "version": "v1",
+  "pkl_filename": "1D_CNN_GaussianBroadenedImpulse_MAE_ShieldingThickness_150MeV_10000samples_TrackNet10Weights_LogValues_kernel_3_CombinedMaterials_epoch20.pkl",
+  "original_folder": "k25_k11_k3_d256_d64_mae_e25_bins50_240",
+  "created_date": "2026-07-14",
+  "status": "active",
+  "notes": ""
+}

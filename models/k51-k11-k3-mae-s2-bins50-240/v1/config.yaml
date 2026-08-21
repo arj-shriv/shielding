@@ -1,0 +1,10 @@
+architecture:
+  conv_kernels: [51, 11, 3]
+  conv_filters: [64, 64, 64]
+  dense_layers: [256, 64, 250]
+  stride_xlarge: 2
+loss: mae
+input_scale: 0.001
+training_bin_range: [50, 240]
+epochs: 25
+n_params: 624570

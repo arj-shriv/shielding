@@ -1,0 +1,9 @@
+{
+  "model_id": "tracknet10-original",
+  "version": "v1",
+  "pkl_filename": "1D_CNN_GaussianBroadenedImpulse_MAE_ShieldingThickness_150MeV_10000samples_TrackNet10Weights_LogValues_kernel_3_CombinedMaterials_epoch20.pkl",
+  "original_folder": "20260706_TrackNet10",
+  "created_date": "2026-07-06",
+  "status": "active",
+  "notes": ""
+}

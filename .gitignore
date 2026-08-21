@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Environments
+.venv/
+venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Generated run artifacts (keep structure, ignore contents)
+runs/training/*/
+runs/inference/*/
+runs/evaluation/*/
+runs/multilayer/*/
+!runs/*/.gitkeep
+
+# Generated reports (keep selected ones explicitly)
+reports/figures/
+reports/tables/
+reports/pdf/
+reports/exports/
+!reports/**/.gitkeep
+
+# Auto-generated inference outputs
+inference_results/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large generated files at repo root (legacy location)
+*.png
+*.pdf
+*.zip
+predictions.zip
+adj_ratio_comparison.png
+dose_*.pdf
+model_comparison_table.png
+
+# Allow paper images and root inference notebook
+!images_for_paper/
+!images_for_paper/**
+!inference_notebook.ipynb
+
+# Generated test datasets inside model folders (large, reproducible)
+models/**/testdata.npz
+models/**/*_sample*.png
+
+# Local config overrides
+.env
+*.local.yaml

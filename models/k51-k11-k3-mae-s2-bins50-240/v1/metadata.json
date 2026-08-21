@@ -1,0 +1,8 @@
+{
+  "val_mae": 0.0921,
+  "val_mse": 0.0199,
+  "n_params": 624570,
+  "trained_date": "2026-08-03",
+  "save_dir": "20260803/k51s2_k11_k3_d256_d64_mae_e25_bins50_240",
+  "epochs_trained": 35
+}
