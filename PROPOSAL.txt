@@ -1,0 +1,292 @@
+SHIELDING-ML PACKAGE PROPOSAL
+==============================
+Neutron shielding CNN surrogate — interactive tool suite, model management, and code framework
+Repository: github.com/arj-shriv/shielding
+
+
+OVERVIEW
+--------
+The package has three integrated components:
+
+  1. Main Tool          — public-facing inference GUI (single/double layer)
+  2. Model Explorer     — advanced GUI for testing all models and techniques
+  3. Code Framework     — clean .py inference + training scripts, auto-updating model registry
+
+Access is tiered: anyone with the app URL can run inference with default models; only
+GitHub collaborators can modify code, train new models, or upload data.
+
+
+================================================================
+COMPONENT 1 — MAIN INFERENCE TOOL
+================================================================
+
+What it does
+------------
+A single-page Streamlit app (app/main_tool.py) with two modes:
+
+  SINGLE LAYER
+    - Select material: Concrete / Steel / BPE
+    - Enter thickness (cm)
+    - Model: k100s2_v1 (default, read-only for public users)
+    - Output: flux spectrum plot (semilogy, 0–250 MeV)
+    - If a matching PHITS file exists in data/raw/phits/high_energy/:
+        show PHITS overlay + dose error % in the title
+
+  DOUBLE LAYER
+    - Select Mat1, Thick1, Mat2, Thick2
+    - Model: k100s2_v1 (layer 1 a-factor) + transfer_mlp (layer 2, TrackNet10 source)
+    - If a matching PHITS file exists in data/raw/phits/multilayer/:
+        show PHITS overlay + dose error %
+
+PHITS file matching logic
+--------------------------
+The app checks data/raw/phits/ at load time and builds a lookup dict:
+  {('Concrete', 45): Path(...), ('Steel', 27): Path(...), ...}
+  {('Concrete',45,'Steel',33): Path(...), ...}
+File names follow the existing convention (Concrete_45cm_1.out, etc.).
+
+PHITS upload by users with code access
+----------------------------------------
+Instructions panel in the sidebar:
+  1. Clone the repo
+  2. Drop .out file into data/raw/phits/high_energy/ or multilayer/
+     naming: <Mat>_<X>cm.out  or  <Mat1>_<X>cm_<Mat2>_<Y>cm.out
+  3. git add, git commit, git push origin main
+  4. App re-reads the folder on next page load (no redeployment needed)
+
+For users without git access, the sidebar shows a GitHub link to open a PR
+or contact the repo owner.
+
+
+================================================================
+COMPONENT 2 — MODEL EXPLORER + TECHNIQUE DOCS
+================================================================
+
+This is a separate Streamlit page (app/pages/2_Model_Explorer.py), gated
+behind a collaborator password stored in Streamlit secrets.
+
+Two sub-sections:
+
+  A. MODEL DOCUMENTATION
+     Renders a card per model read from models/registry.json.
+     Each card shows: architecture summary, training source, val MAE,
+     status (primary / experimental / archived), and a plain-English
+     description written when the model was trained.
+     Sections:
+       - Primary models (k100s2_v1, transfer_mlp)
+       - Experimental models (source-matched variants, transfer head variants)
+       - Archived models (piecewise6, tracknet10-original, etc.)
+     Also explains techniques: what multilayer chaining is, why TrackNet10
+     is used as the layer-2 source, what the a-factor does, etc.
+
+  B. ADVANCED INFERENCE TOOL
+     Single-layer:
+       - Select any model from registry (primary + experimental)
+       - Select material + thickness
+       - Optional: PHITS overlay if file exists
+     Double-layer (all options exposed):
+       Option A — k100s2_v1 chained (normalised CNN L1 output as L2 source)
+       Option B — k100s2_v1 + transfer_mlp, TrackNet10 as L2 source  [PRIMARY]
+       Option C — k100s2_v1 + any experimental transfer head
+       Option D — bi-model (source-matched k100s2 for L2)
+       For each: select specific models from dropdowns, see flux + dose output
+     Side-by-side comparison: two configs plotted on the same axes
+
+
+================================================================
+COMPONENT 3 — CODE FRAMEWORK
+================================================================
+
+Inference .py files
+--------------------
+All importable functions; no logic in notebooks or app pages.
+
+  scripts/inference/single_layer.py
+    predict_single_layer(model, material, thickness_cm, source_spec) -> np.ndarray
+    load_primary_model() -> keras.Model
+    # clearly commented: input shape, normalisation, output scale
+
+  scripts/inference/multilayer.py
+    # Each approach is a clearly-named function with a docstring stating
+    # what variant it implements and its known performance.
+
+    predict_chained_cnn_source(model_v1, mat1, t1, mat2, t2)
+      # VARIANT A — baseline chaining: normalised CNN L1 output as L2 source
+      # Result: avg_ratio 3.3–6.4 concrete-first, 0.31–0.40 steel-first
+
+    predict_tracknet_source(model_v1, transfer_mlp, mat1, t1, mat2, t2)
+      # VARIANT B — PRIMARY: TrackNet10 as L2 source, a-factor from L1
+      # Result: dose error -28% to +18%
+
+    predict_bimodel(model_v1, model_l2, mat1, t1, mat2, t2)
+      # VARIANT C — bi-model: separate k100s2 trained on shielded source for L2
+      # Result: no improvement over baseline
+
+    compute_a_factor(model_v1, source_spec, material, thickness_cm)
+      # Layer-1 amplitude attenuation: CNN_L1[20:150] / void[20:150]
+
+Training .py files
+--------------------
+  scripts/training/train_k100s2.py
+    Entry: --name <model_name> --source tracknet10|concrete25|... --epochs N --loss mae
+    - Checks if models/<name>/ already exists in registry.json
+      -> if yes: prints warning "Model '<name>' already exists. Use --overwrite to replace."
+      -> if no:  trains, saves to models/k100s2-.../experimental/<name>/ by default
+                 (user passes --primary to put it in primary/)
+    - After training: writes metadata + updates models/registry.json
+    - Writes a short description to models/<name>/description.txt
+      (auto-generated from training args; user can edit it)
+
+  scripts/training/train_transfer.py
+    Entry: --name <model_name> --arch mlp|conv|linear --source <source_name> --epochs N
+    - Same exists-check logic
+    - Saves to models/k100s2-.../experimental/<name>/
+
+Model registry
+---------------
+models/registry.json  (replaces / supplements registry.csv)
+One entry per model:
+  {
+    "k100s2_v1": {
+      "path": "models/k100s2-.../primary/k100s2_v1/model.pkl",
+      "type": "primary",
+      "architecture": "Conv1D k100s2 + k25s2 + k11 + k3 + Dense256 + Dense64",
+      "params": 474298,
+      "training_source": "tracknet10",
+      "val_mae": 0.045,
+      "created": "2026-07-06",
+      "status": "active",
+      "description": "Main single-layer model. Trained on TrackNet10 beam..."
+    },
+    ...
+  }
+
+Both apps and all training scripts read from/write to this single JSON.
+App pages rebuild their dropdowns from it on load.
+
+
+================================================================
+ACCESS CONTROL
+================================================================
+
+Tier 1 — Public / restricted users
+  - Access the deployed Streamlit app URL
+  - Can use Main Tool (Component 1) freely
+  - Model Explorer page is password-gated (Streamlit secrets: EXPLORER_PASSWORD)
+  - Cannot upload PHITS files directly (see instructions in sidebar)
+  - Cannot train new models
+  - Cannot modify code
+
+Tier 2 — GitHub collaborators (code access)
+  - Full repo access: clone, edit, push
+  - Can train models, upload PHITS files, modify scripts
+  - See both apps without password prompt
+     (app detects a COLLABORATOR_TOKEN in environment, set in their local .env)
+  - Training scripts write to models/ and update registry.json
+  - A push to main triggers Streamlit redeployment (GitHub Actions webhook)
+
+Implementation
+  - Repo stays private on GitHub; only collaborators are added
+  - Streamlit app deployed on Streamlit Community Cloud (private app option)
+    or self-hosted behind a simple reverse proxy
+  - Secrets managed in Streamlit Cloud dashboard (EXPLORER_PASSWORD,
+    COLLABORATOR_TOKEN, GITHUB_PAT for PHITS commit API)
+  - No API keys or credentials in the repo itself
+
+
+================================================================
+GITHUB INTEGRATION & CI/CD
+================================================================
+
+Repo structure for the app
+  shielding-ml/
+  ├── app/
+  │   ├── main_tool.py             # Streamlit entry point (Main Tool)
+  │   ├── pages/
+  │   │   └── 2_Model_Explorer.py  # Advanced tool + docs
+  │   └── components/
+  │       ├── flux_plot.py         # Shared plotting helpers
+  │       ├── model_loader.py      # Load from registry.json
+  │       └── phits_matcher.py     # Map (mat, thick) -> PHITS path
+  ├── scripts/
+  │   ├── inference/
+  │   │   ├── single_layer.py
+  │   │   └── multilayer.py
+  │   └── training/
+  │       ├── train_k100s2.py
+  │       └── train_transfer.py
+  ├── models/
+  │   ├── registry.json            # Source of truth
+  │   └── k100s2-.../
+  │       ├── primary/
+  │       └── experimental/
+  ├── data/raw/phits/              # Drop new .out files here
+  ├── inference_notebook.ipynb     # Existing notebook (still works)
+  ├── requirements.txt             # streamlit, numpy, matplotlib, etc.
+  └── .streamlit/config.toml      # Theme config
+
+GitHub Actions (CI)
+  On push to main:
+    1. Run tests (pytest tests/)
+    2. Validate registry.json schema
+    3. Ping Streamlit redeployment webhook (or auto-redeploys via GitHub integration)
+
+On PR with new PHITS file:
+    1. Check file naming convention
+    2. Run a quick sanity-parse (load_phits on the file, check 250 bins)
+    3. Report PASS/FAIL as a PR check
+
+PHITS upload via GitHub API (optional, for non-git users)
+  A Streamlit file uploader widget (shown only with COLLABORATOR_TOKEN set):
+    - User uploads .out file
+    - App uses PyGitHub (GitHub REST API) with a stored PAT to commit the file
+      to data/raw/phits/ on a new branch and open a PR automatically
+    - PR is reviewed and merged by a collaborator
+    - On merge, app picks up the file on next load
+
+
+================================================================
+DEPLOYMENT SEQUENCE
+================================================================
+
+Phase 1 — Code framework (no app yet)
+  - Create scripts/inference/single_layer.py and multilayer.py
+  - Create scripts/training/train_k100s2.py and train_transfer.py
+  - Migrate registry.csv → registry.json with descriptions
+  - Write description.txt for all existing models
+
+Phase 2 — Main Tool
+  - Build app/main_tool.py with Streamlit
+  - Wire to single_layer.py and multilayer.py (primary mode)
+  - PHITS file matcher
+  - Sidebar instructions for uploading new PHITS data
+  - Deploy to Streamlit Community Cloud (connect to GitHub repo)
+
+Phase 3 — Model Explorer
+  - Build app/pages/2_Model_Explorer.py
+  - Documentation cards from registry.json
+  - Advanced inference tool (all variants, side-by-side)
+  - Password gate
+
+Phase 4 — Training integration
+  - Update train_*.py to write to registry.json
+  - GitHub Actions CI (test + registry validation)
+  - PHITS upload PR check action
+
+Phase 5 — Polish
+  - Access control refinement (COLLABORATOR_TOKEN flow)
+  - GitHub API-based PHITS uploader in the app (non-git users)
+  - README with deployment instructions
+
+
+================================================================
+NOTES ON EXISTING CODEBASE
+================================================================
+
+- inference_notebook.ipynb: stays as-is, still works for local use
+- Symlinks (v1 -> primary/k100s2_v1, transfer_cnn_source_mlp -> primary/transfer_mlp):
+    kept for backward compat, all new code uses full paths from registry.json
+- INFERENCE.md / STRUCTURE.md / commands.md: updated alongside each phase
+- venv: Streamlit app runs on Python 3.13 + Keras 3.14.1; requirements.txt
+    pinned to match (critical for .pkl deserialization)
+- The data/ and models/ folders are read at app startup; no database needed

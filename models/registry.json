@@ -1,0 +1,276 @@
+{
+  "_comment": "Machine-readable model registry. Updated by training scripts. Read by both Streamlit apps.",
+
+  "primary": {
+    "k100s2_v1": {
+      "pkl":          "models/k100s2-k25s2-k11-k3-d256-d64-mae-bins50-240/primary/k100s2_v1/model.pkl",
+      "architecture": "Conv1D k100(s2) → Conv1D k25(s2) → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       474298,
+      "loss":         "MAE",
+      "input_scale":  0.001,
+      "training_source": "TrackNet10",
+      "bin_range":    [50, 240],
+      "val_mae":      0.045,
+      "created":      "2026-08-03",
+      "status":       "active",
+      "use_for":      ["single_layer", "multilayer_layer1"],
+      "description":  "Primary single-layer model. Four Conv1D layers with strided kernels (k=100 stride 2, k=25 stride 2, k=11, k=3) compress the 250-bin input before two Dense layers. Trained on TrackNet10 Ca-48 150 MeV/n source with MAE loss over bins 50–240. Achieves dose errors under 20% on most single-layer PHITS cases."
+    },
+    "transfer_mlp": {
+      "pkl":          "models/k100s2-k25s2-k11-k3-d256-d64-mae-bins50-240/primary/transfer_mlp/transfer_model.pkl",
+      "architecture": "Frozen k100s2_v1 backbone → Dense 64 (ReLU) → Dense 250",
+      "params":       32314,
+      "loss":         "MAE",
+      "input_scale":  0.001,
+      "training_source": "CNN layer-1 predictions (Concrete/Steel/BPE, 5 thicknesses each)",
+      "bin_range":    [50, 240],
+      "val_mae":      0.077,
+      "created":      "2026-08-05",
+      "status":       "active",
+      "use_for":      ["multilayer_layer2"],
+      "description":  "Transfer MLP head for multilayer layer-2 inference. The entire k100s2_v1 backbone is frozen; only the 32K-parameter MLP head (Dense 64 → Dense 250) is trained. Used in the primary multilayer mode where TrackNet10 is fed as the layer-2 source and the amplitude factor from layer-1 is applied to the output. Achieves dose error −28% to +18% across all 6 multilayer PHITS cases."
+    }
+  },
+
+  "experimental": {
+    "v_concrete25": {
+      "pkl":          "models/k100s2-k25s2-k11-k3-d256-d64-mae-bins50-240/experimental/v_concrete25/model.pkl",
+      "architecture": "Conv1D k100(s2) → k25(s2) → k11 → k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       474298,
+      "loss":         "MAE",
+      "training_source": "Piecewise fit to Concrete 25cm PHITS output",
+      "val_mae":      null,
+      "created":      "2026-08-05",
+      "status":       "experimental",
+      "use_for":      ["single_layer", "multilayer_layer2_bimodel"],
+      "description":  "k100s2 variant trained using a piecewise spectral fit to the Concrete 25cm PHITS output as the source spectrum instead of TrackNet10. Tested as a source-matched layer-2 model in bi-model multilayer — showed no improvement over baseline."
+    },
+    "v_steel27": {
+      "pkl":          "models/k100s2-k25s2-k11-k3-d256-d64-mae-bins50-240/experimental/v_steel27/model.pkl",
+      "architecture": "Conv1D k100(s2) → k25(s2) → k11 → k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       474298,
+      "loss":         "MAE",
+      "training_source": "Piecewise fit to Steel 27cm PHITS output",
+      "val_mae":      null,
+      "created":      "2026-08-05",
+      "status":       "experimental",
+      "use_for":      ["single_layer", "multilayer_layer2_bimodel"],
+      "description":  "k100s2 variant trained on a piecewise fit to the Steel 27cm PHITS output. Same bi-model experiment as v_concrete25 — showed no measurable improvement."
+    },
+    "v_bpe25": {
+      "pkl":          "models/k100s2-k25s2-k11-k3-d256-d64-mae-bins50-240/experimental/v_bpe25/model.pkl",
+      "architecture": "Conv1D k100(s2) → k25(s2) → k11 → k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       474298,
+      "loss":         "MAE",
+      "training_source": "Piecewise fit to BPE 25cm PHITS output",
+      "val_mae":      null,
+      "created":      "2026-08-05",
+      "status":       "experimental",
+      "use_for":      ["single_layer", "multilayer_layer2_bimodel"],
+      "description":  "k100s2 variant trained on a piecewise fit to the BPE 25cm PHITS output."
+    },
+    "transfer_learned": {
+      "pkl":          "models/k100s2-k25s2-k11-k3-d256-d64-mae-bins50-240/experimental/transfer_learned/transfer_model.pkl",
+      "architecture": "Frozen k100s2_v1 → Dense 250 (linear head)",
+      "params":       63250,
+      "loss":         "MAE",
+      "training_source": "Piecewise concrete25 source",
+      "val_mae":      0.173,
+      "created":      "2026-08-05",
+      "status":       "experimental",
+      "use_for":      ["multilayer_layer2"],
+      "description":  "First transfer head attempt: a single Dense(250) linear layer on top of the frozen k100s2_v1 output. Trained on piecewise concrete25 source spectra. Validation MAE plateaued at 0.173 — same as baseline. The linear head lacked capacity to correct spectral shape distortions."
+    },
+    "transfer_concrete45_mlp": {
+      "pkl":          "models/k100s2-k25s2-k11-k3-d256-d64-mae-bins50-240/experimental/transfer_concrete45_mlp/transfer_model.pkl",
+      "architecture": "Frozen k100s2_v1 → Dense 64 (ReLU) → Dense 250",
+      "params":       32314,
+      "loss":         "MAE",
+      "training_source": "Piecewise fit to Concrete 45cm PHITS output",
+      "val_mae":      0.150,
+      "created":      "2026-08-05",
+      "status":       "experimental",
+      "use_for":      ["multilayer_layer2"],
+      "description":  "MLP transfer head trained with a piecewise fit to the Concrete 45cm PHITS output as source. Improved val MAE to 0.150 (from 0.173) but worsened all inference cases. Root cause: head is trained on piecewise-approximated spectra; at inference it sees the actual CNN layer-1 output, which has a different distribution."
+    },
+    "transfer_conv_head": {
+      "pkl":          "models/k100s2-k25s2-k11-k3-d256-d64-mae-bins50-240/experimental/transfer_conv_head/transfer_model.pkl",
+      "architecture": "Frozen k100s2_v1 conv backbone → Conv1D(50,k50) → Conv1D(10,k10,s2) → Flatten → Dense 250",
+      "params":       185310,
+      "loss":         "MAE",
+      "training_source": "Actual CNN layer-1 predictions (15 source spectra)",
+      "val_mae":      0.046,
+      "created":      "2026-08-05",
+      "status":       "experimental",
+      "use_for":      ["multilayer_layer2"],
+      "description":  "Conv1D transfer head trained on actual k100s2_v1 layer-1 outputs (Concrete/Steel/BPE at 5 thicknesses each). Head attaches after the frozen Conv1D_3 layer. Best val MAE of 0.046 but still worsened all 5 multilayer inference cases — the amplitude error from the a-factor is the dominant source of error, not the spectral shape."
+    }
+  },
+
+  "archived": {
+    "tracknet10-original": {
+      "pkl":          "models/tracknet10-original/v1/model.pkl",
+      "architecture": "Conv1D k3 → Conv1D k3 → MaxPool → Flatten(8000) → Dense 512 → Dense 250",
+      "params":       4231290,
+      "loss":         "MSE",
+      "training_source": "TrackNet10",
+      "created":      "2026-07-06",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "Original TrackNet10 surrogate model (~9× more parameters than k100s2_v1). Two Conv1D layers with small kernels (k=3) followed by a large Dense(512) layer. Trained with MSE loss. Superseded by k100s2_v1 which achieves lower dose error with far fewer parameters."
+    },
+    "piecewise6": {
+      "pkl":          "models/piecewise6/v1/model.pkl",
+      "architecture": "Conv1D k3 → Conv1D k3 → MaxPool → Flatten(8000) → Dense 512 → Dense 250",
+      "params":       4231290,
+      "loss":         "MSE",
+      "training_source": "Piecewise6 random source ensemble",
+      "created":      "2026-07-07",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "TrackNet10-architecture model trained on the piecewise6 random source ensemble (smoothly-varying spectra from triply-broken power law and exponential components) rather than a fixed beam. Archived — piecewise training improved source diversity but the architecture was later replaced by k100s2."
+    },
+    "piecewise6-offset-1.1": {
+      "pkl":          "models/piecewise6-offset-1.1/v1/model.pkl",
+      "architecture": "Conv1D k3 → Conv1D k3 → MaxPool → Flatten(8000) → Dense 512 → Dense 250",
+      "params":       4231290,
+      "loss":         "MSE",
+      "training_source": "Piecewise6 with noise offset ×1.1",
+      "created":      "2026-07-08",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "Piecewise6 model with the noise amplitude σ(E) scaled up by 1.1×. Part of a systematic study of noise level sensitivity in the training source."
+    },
+    "piecewise6-offset-1.2": {
+      "pkl":          "models/piecewise6-offset-1.2/v1/model.pkl",
+      "architecture": "Conv1D k3 → Conv1D k3 → MaxPool → Flatten(8000) → Dense 512 → Dense 250",
+      "params":       4231290,
+      "loss":         "MSE",
+      "training_source": "Piecewise6 with noise offset ×1.2",
+      "created":      "2026-07-08",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "Piecewise6 + noise offset ×1.2. Noise sensitivity study variant."
+    },
+    "piecewise6-offset-1.3": {
+      "pkl":          "models/piecewise6-offset-1.3/v1/model.pkl",
+      "architecture": "Conv1D k3 → Conv1D k3 → MaxPool → Flatten(8000) → Dense 512 → Dense 250",
+      "params":       4231290,
+      "loss":         "MSE",
+      "training_source": "Piecewise6 with noise offset ×1.3",
+      "created":      "2026-07-08",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "Piecewise6 + noise offset ×1.3."
+    },
+    "piecewise6-offset-1.4": {
+      "pkl":          "models/piecewise6-offset-1.4/v1/model.pkl",
+      "architecture": "Conv1D k3 → Conv1D k3 → MaxPool → Flatten(8000) → Dense 512 → Dense 250",
+      "params":       4231290,
+      "loss":         "MSE",
+      "training_source": "Piecewise6 with noise offset ×1.4",
+      "created":      "2026-07-08",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "Piecewise6 + noise offset ×1.4. Highest noise level tested in this series."
+    },
+    "k11-k3-d256-d128-mse": {
+      "pkl":          "models/k11-k3-d256-d128-mse/v1/model.pkl",
+      "architecture": "Conv1D k11 → Conv1D k3 → Dense 256 → Dense 128 → Dense 250",
+      "loss":         "MSE",
+      "training_source": "TrackNet10",
+      "created":      "2026-07-09",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "Two-Conv1D architecture with larger kernels (k=11, k=3) and a wider Dense layer (256→128). Archived — intermediate step toward the final k100s2 architecture."
+    },
+    "k25-k11-k3-mae": {
+      "pkl":          "models/k25-k11-k3-mae/v1/model.pkl",
+      "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "loss":         "MAE",
+      "training_source": "TrackNet10",
+      "created":      "2026-07-13",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "Three-Conv1D architecture with increasing receptive field (k25→k11→k3). First model to use MAE loss instead of MSE. Predecessor to k100s2_v1."
+    },
+    "k25-k11-k3-mse": {
+      "pkl":          "models/k25-k11-k3-mse/v1/model.pkl",
+      "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "loss":         "MSE",
+      "training_source": "TrackNet10",
+      "created":      "2026-07-09",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "Same three-Conv1D architecture as k25-k11-k3-mae but trained with MSE. Included for loss function comparison."
+    },
+    "k25-k11-k3-mae-scale0005": {
+      "pkl":          "models/k25-k11-k3-mae-scale0005/v1/model.pkl",
+      "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "loss":         "MAE",
+      "training_source": "TrackNet10",
+      "created":      "2026-07-13",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "k25 architecture with input_scale=0.0005 (thickness and density scaled by 0.0005 instead of 0.001). Input scaling sensitivity study."
+    },
+    "k25-k11-k3-mae-scale01": {
+      "pkl":          "models/k25-k11-k3-mae-scale01/v1/model.pkl",
+      "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "loss":         "MAE",
+      "training_source": "TrackNet10",
+      "created":      "2026-07-13",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "k25 architecture with input_scale=0.1. One of several input scaling experiments."
+    },
+    "k25-k11-k3-mae-bins240": {
+      "pkl":          "models/k25-k11-k3-mae-bins240/v1/model.pkl",
+      "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "loss":         "MAE",
+      "training_source": "TrackNet10",
+      "bin_range":    [0, 240],
+      "created":      "2026-07-14",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "k25 architecture trained with loss over bins 0–240 (including low-energy region). Compared against the bins 50–240 variant."
+    },
+    "k25-k11-k3-mae-bins50-240": {
+      "pkl":          "models/k25-k11-k3-mae-bins50-240/v1/model.pkl",
+      "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "loss":         "MAE",
+      "training_source": "TrackNet10",
+      "bin_range":    [50, 240],
+      "created":      "2026-07-14",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "k25 architecture with loss focused on bins 50–240 (excluding thermal region below 50 MeV). This bin range was carried forward into k100s2_v1."
+    },
+    "k51-k11-k3-mae-s1-bins50-240": {
+      "pkl":          "models/k51-k11-k3-mae-s1-bins50-240/v1/model.pkl",
+      "architecture": "Conv1D k51(s1) → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       1130000,
+      "loss":         "MAE",
+      "training_source": "TrackNet10",
+      "bin_range":    [50, 240],
+      "val_mae":      0.0827,
+      "created":      "2026-08-03",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "Wider kernel variant: k51 stride-1 first layer (1.13M params). Achieved val MAE=0.0827 but uses ~2.4× more parameters than k100s2_v1 for similar performance. Archived in favour of k100s2 which uses stride-2 to reduce parameter count."
+    },
+    "k51-k11-k3-mae-s2-bins50-240": {
+      "pkl":          "models/k51-k11-k3-mae-s2-bins50-240/v1/model.pkl",
+      "architecture": "Conv1D k51(s2) → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       624000,
+      "loss":         "MAE",
+      "training_source": "TrackNet10",
+      "bin_range":    [50, 240],
+      "val_mae":      0.0967,
+      "created":      "2026-08-03",
+      "status":       "archived",
+      "use_for":      ["single_layer"],
+      "description":  "k51 with stride=2 to reduce parameters to 624K. Val MAE=0.0967. Motivated the move to k100 strided kernels in k100s2_v1."
+    }
+  }
+}
