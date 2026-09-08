@@ -16,7 +16,7 @@ from pathlib import Path
 import streamlit as st
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO.parent))
+sys.path.insert(0, str(REPO))
 
 from shielding_ml.pipelines.paths import PHITS_HE, PHITS_ML
 

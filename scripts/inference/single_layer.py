@@ -26,7 +26,7 @@ import numpy as np
 
 # ── package imports ───────────────────────────────────────────────────────────
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO.parent))
+sys.path.insert(0, str(REPO))
 
 from shielding_ml.data.constants import FLUX_SCALE, MATERIALS, E_ALL
 from shielding_ml.data.loaders import load_spectrum

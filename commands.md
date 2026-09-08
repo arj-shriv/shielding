@@ -1,11 +1,38 @@
 # Commands
 
-All commands run from the repo root: `/Users/arjun/Python_Codes_Refactored/shielding-ml`  
-Always use `../venv/bin/python`, not system Python.
+All commands run from the repo root (the `shielding-ml/` folder).
+Always use `../venv/bin/python` (Python 3.13 + Keras 3.14.x venv), not system Python.
 
 ---
 
 ## Training
+
+### Registered training (recommended — writes to models/registry.json)
+Both scripts refuse to retrain an existing `--name` unless `--overwrite` is passed, and
+after training write `model.pkl` + `description.txt` + a `models/registry.json` entry that
+both Streamlit apps immediately see.
+
+```bash
+# k100s2 variant with a chosen source spectrum
+../venv/bin/python scripts/training/train_k100s2.py --name v_concrete25 --source concrete25 --epochs 25
+../venv/bin/python scripts/training/train_k100s2.py --name k100s2_v2 --source tracknet10 --epochs 25 --primary
+
+# Transfer head on the frozen k100s2_v1 backbone
+../venv/bin/python scripts/training/train_transfer.py --name transfer_mlp_v2 --arch mlp   --epochs 15
+../venv/bin/python scripts/training/train_transfer.py --name transfer_conv2   --arch conv  --epochs 15
+../venv/bin/python scripts/training/train_transfer.py --name transfer_lin2    --arch linear --epochs 15
+
+# Retrain an existing name (blocked by default)
+../venv/bin/python scripts/training/train_k100s2.py --name v_concrete25 --source concrete25 --overwrite
+```
+
+Both read response matrices from `data/raw/response_matrices/{Concrete,Steel,BPE}/` (committed
+to the repo — no external data directory needed). New models land in
+`models/.../experimental/<name>/` by default; `--primary` puts them in `primary/` instead.
+
+---
+
+### Legacy training scripts (pre-registry, still functional)
 
 ### Source-matched k100s2 models
 Train the k100s2 architecture with a specific shielded source spectrum.  
@@ -57,6 +84,30 @@ Key flags: `--sources`, `--epochs`, `--loss mae`, `--n_per_src`
 inference_notebook.ipynb
 ```
 Open with the `../venv/bin/python` kernel (Python 3.13). Covers single-layer inference, multilayer primary mode (TrackNet10 source + transfer_mlp), and loading experimental models. Best starting point for a new case.
+
+---
+
+### Streamlit tool suite (Main Tool + Model Explorer)
+```bash
+../venv/bin/streamlit run app/main_tool.py
+```
+- **Main Tool** (`app/main_tool.py`) — public-facing single/double-layer inference with the
+  primary models, PHITS auto-overlay, and architecture diagrams in the sidebar.
+- **Model Explorer** (`app/pages/2_Model_Explorer.py`) — appears automatically in the
+  left nav. Full model documentation from `registry.json` plus an advanced inference tool
+  exposing every registered model and multilayer variant (A/B/C/D), with a two-config
+  side-by-side comparison. Password-gated by `EXPLORER_PASSWORD` — copy
+  `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml` and set a real password
+  (gitignored; runs unlocked with a warning if unset, for local dev).
+
+---
+
+### CI checks (also run locally before pushing)
+```bash
+../venv/bin/python scripts/utilities/validate_registry.py          # schema + pkl-path check
+../venv/bin/python scripts/utilities/check_phits_upload.py --all   # naming + 250-bin parse check
+../venv/bin/python -m pytest tests/ -v
+```
 
 ---
 

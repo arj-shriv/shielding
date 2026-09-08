@@ -43,7 +43,7 @@ from pathlib import Path
 import numpy as np
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO.parent))
+sys.path.insert(0, str(REPO))
 
 from scripts.inference.single_layer import (
     predict_flux, compute_dose, get_void_flux, _get_shared_resources,

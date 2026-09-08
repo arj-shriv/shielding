@@ -32,7 +32,7 @@ reports/exports/
 !reports/**/.gitkeep
 
 # Auto-generated inference outputs
-inference_results/
+
 
 # Jupyter
 .ipynb_checkpoints/
@@ -50,10 +50,16 @@ adj_ratio_comparison.png
 dose_*.pdf
 model_comparison_table.png
 
-# Allow paper images and root inference notebook
+# Allow paper images, app assets, and root inference notebook
 !images_for_paper/
 !images_for_paper/**
+!app/assets/
+!app/assets/**
 !inference_notebook.ipynb
+
+# Re-exclude bytecode caches even under the negated paths above
+images_for_paper/**/__pycache__/
+app/assets/**/__pycache__/
 
 # Generated test datasets inside model folders (large, reproducible)
 models/**/testdata.npz
@@ -62,3 +68,9 @@ models/**/*_sample*.png
 # Local config overrides
 .env
 *.local.yaml
+
+# Streamlit secrets (EXPLORER_PASSWORD, COLLABORATOR_TOKEN, GITHUB_PAT) — never commit
+.streamlit/secrets.toml
+
+# Claude Code session transcripts — not project content
+*.jsonl

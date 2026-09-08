@@ -28,6 +28,11 @@ def flux_figure(
     dose_phits:    float | None      = None,
     title:         str               = "",
     figsize:       tuple             = (8, 5),
+    cnn_flux2:     np.ndarray | None = None,
+    cnn_label2:    str | None        = None,
+    cnn_color2:    str | None        = None,
+    dose_cnn2:     float | None      = None,
+    show_dose_annotation: bool       = True,
 ) -> plt.Figure:
     """
     Build a semilogy flux spectrum figure.
@@ -43,6 +48,13 @@ def flux_figure(
     dose_phits : PHITS dose rate (mrem/hr) — shown with error % if provided
     title      : main plot title
     figsize    : figure size in inches
+    cnn_flux2/cnn_label2/cnn_color2/dose_cnn2 :
+        optional second CNN trace, for side-by-side config comparison
+        (Model Explorer). Omit for the single-trace Main Tool plot.
+    show_dose_annotation :
+        print the dose/error text below the plot. Main Tool sets this False
+        since the same numbers live in dedicated metric cards next to the
+        plot — repeating them inside the figure is just noise there.
     """
     fig, ax = plt.subplots(figsize=figsize, dpi=110)
 
@@ -51,9 +63,12 @@ def flux_figure(
         ax.semilogy(energies, phits_flux, color="black", lw=2.0,
                     label="PHITS", zorder=5)
 
-    # CNN prediction
+    # CNN prediction(s)
     ax.semilogy(energies, cnn_flux, color=cnn_color, lw=2.0,
                 ls="--", label=cnn_label, zorder=6)
+    if cnn_flux2 is not None:
+        ax.semilogy(energies, cnn_flux2, color=cnn_color2, lw=2.0,
+                    ls=":", label=cnn_label2, zorder=6)
 
     ax.set_xlim(0, 250)
     ax.set_xlabel("Neutron energy (MeV)", fontsize=11)
@@ -65,17 +80,16 @@ def flux_figure(
         ax.set_title(title, fontsize=12, fontweight="bold", pad=10)
 
     # Dose annotation below x-axis
-    if dose_cnn is not None:
+    if show_dose_annotation and dose_cnn is not None:
+        parts = [f"{cnn_label}: {dose_cnn:.3e} mrem/hr"]
+        if dose_cnn2 is not None:
+            parts.append(f"{cnn_label2}: {dose_cnn2:.3e} mrem/hr")
         if dose_phits is not None:
             pct = 100.0 * (dose_cnn - dose_phits) / dose_phits
             sign = "+" if pct >= 0 else ""
-            subtitle = (
-                f"Dose rate — CNN: {dose_cnn:.3e} mrem/hr  |  "
-                f"PHITS: {dose_phits:.3e} mrem/hr  |  "
-                f"Error: {sign}{pct:.1f}%"
-            )
-        else:
-            subtitle = f"Dose rate — CNN: {dose_cnn:.3e} mrem/hr"
+            parts.append(f"PHITS: {dose_phits:.3e} mrem/hr")
+            parts.append(f"Error: {sign}{pct:.1f}%")
+        subtitle = "Dose rate — " + "  |  ".join(parts)
 
         fig.text(
             0.5, -0.02, subtitle,

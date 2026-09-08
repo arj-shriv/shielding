@@ -2,6 +2,8 @@ streamlit>=1.35
 numpy>=1.26
 scipy>=1.13
 matplotlib>=3.9
+requests>=2.31          # Model Explorer's GitHub write actions (github_write.py)
+scikit-learn>=1.4       # train_test_split — needed if the "Train new model" panel is used
 # keras/tensorflow — must match the venv used to train the models
 # Models were saved with Keras 3.14.1 / Python 3.13.
 # When deploying, ensure the runtime matches; mismatched keras versions

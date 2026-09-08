@@ -37,6 +37,7 @@ DATA_PROCESSED = REPO_ROOT / "data" / "processed"
 PHITS_HE       = DATA_RAW / "phits" / "high_energy"
 PHITS_LE       = DATA_RAW / "phits" / "low_energy"
 PHITS_ML       = DATA_RAW / "phits" / "multilayer"
+PHITS_3L       = DATA_RAW / "phits" / "3layer"
 RESPONSE_MATS  = DATA_RAW / "response_matrices"
 SPECTRA_DIR    = DATA_RAW / "spectra"
 

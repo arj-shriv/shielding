@@ -177,6 +177,7 @@
     "k11-k3-d256-d128-mse": {
       "pkl":          "models/k11-k3-d256-d128-mse/v1/model.pkl",
       "architecture": "Conv1D k11 → Conv1D k3 → Dense 256 → Dense 128 → Dense 250",
+      "params":       2120698,
       "loss":         "MSE",
       "training_source": "TrackNet10",
       "created":      "2026-07-09",
@@ -187,6 +188,7 @@
     "k25-k11-k3-mae": {
       "pkl":          "models/k25-k11-k3-mae/v1/model.pkl",
       "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       1127482,
       "loss":         "MAE",
       "training_source": "TrackNet10",
       "created":      "2026-07-13",
@@ -197,6 +199,7 @@
     "k25-k11-k3-mse": {
       "pkl":          "models/k25-k11-k3-mse/v1/model.pkl",
       "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       603066,
       "loss":         "MSE",
       "training_source": "TrackNet10",
       "created":      "2026-07-09",
@@ -207,6 +210,7 @@
     "k25-k11-k3-mae-scale0005": {
       "pkl":          "models/k25-k11-k3-mae-scale0005/v1/model.pkl",
       "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       1127482,
       "loss":         "MAE",
       "training_source": "TrackNet10",
       "created":      "2026-07-13",
@@ -217,6 +221,7 @@
     "k25-k11-k3-mae-scale01": {
       "pkl":          "models/k25-k11-k3-mae-scale01/v1/model.pkl",
       "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       1127482,
       "loss":         "MAE",
       "training_source": "TrackNet10",
       "created":      "2026-07-13",
@@ -227,6 +232,7 @@
     "k25-k11-k3-mae-bins240": {
       "pkl":          "models/k25-k11-k3-mae-bins240/v1/model.pkl",
       "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       1127482,
       "loss":         "MAE",
       "training_source": "TrackNet10",
       "bin_range":    [0, 240],
@@ -238,6 +244,7 @@
     "k25-k11-k3-mae-bins50-240": {
       "pkl":          "models/k25-k11-k3-mae-bins50-240/v1/model.pkl",
       "architecture": "Conv1D k25 → Conv1D k11 → Conv1D k3 → Dense 256 → Dense 64 → Dense 250",
+      "params":       1127482,
       "loss":         "MAE",
       "training_source": "TrackNet10",
       "bin_range":    [50, 240],

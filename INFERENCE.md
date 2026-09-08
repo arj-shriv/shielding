@@ -15,7 +15,7 @@ The CNN takes a neutron **input spectrum + shielding geometry** and predicts the
 | Transfer MLP (multilayer layer-2 head) | `models/<model-id>/primary/transfer_mlp/transfer_model.pkl` |
 | Experimental / deprecated variants | `models/<model-id>/experimental/<variant>/` |
 | Backward-compat symlinks | `v1 → primary/k100s2_v1`, `transfer_cnn_source_mlp → primary/transfer_mlp` |
-| Model registry (all models + status) | `models/registry.csv` |
+| Model registry (all models + status) | `models/registry.json` (single source of truth; `registry.csv` is legacy) |
 | PHITS single-layer references | `data/raw/phits/high_energy/` |
 | PHITS multilayer references | `data/raw/phits/multilayer/` |
 | Input beam spectrum | `data/raw/spectra/TrackNet10_spectrum.dat` |
@@ -103,10 +103,14 @@ Output: `inference_results/tracknet_source_l2/comparison.pdf`
   Name format: `<Mat1>_<X>cm_<Mat2>_<Y>cm.out` (auto-parsed by the inference pipeline)
 
 ### Adding a new model
-1. Copy `model.pkl` to `models/<new-id>/v1/`
-2. Add `config.yaml` and `metadata.json` alongside it
-3. Add a row to `models/registry.csv`
-4. Re-run `python scripts/run_all_inference.py`
+Use the registered training scripts — they save the model, write `description.txt`, and
+add the `models/registry.json` entry in one step (no manual file copying):
+```bash
+../venv/bin/python scripts/training/train_k100s2.py  --name <new-id> --source <source>
+../venv/bin/python scripts/training/train_transfer.py --name <new-id> --arch mlp|linear|conv
+```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full walkthrough, including adding a new
+source spectrum to train against.
 
 ---
 

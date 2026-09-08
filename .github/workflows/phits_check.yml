@@ -1,0 +1,39 @@
+name: PHITS upload check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "data/raw/phits/**"
+
+jobs:
+  check-phits-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install package (no dev extras needed — just numpy for the loader)
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy
+
+      - name: Find changed PHITS files
+        id: changed
+        run: |
+          git diff --name-only --diff-filter=ACM \
+            origin/${{ github.base_ref }}...HEAD \
+            -- 'data/raw/phits/**/*.out' > changed_files.txt
+          cat changed_files.txt
+          echo "count=$(wc -l < changed_files.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Sanity-check changed files
+        if: steps.changed.outputs.count != '0'
+        run: python scripts/utilities/check_phits_upload.py $(cat changed_files.txt)
