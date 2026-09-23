@@ -65,6 +65,9 @@ app/assets/**/__pycache__/
 models/**/testdata.npz
 models/**/*_sample*.png
 
+# Reproducible dose-map sweep caches (regenerate by deleting the .npy)
+analysis/dosemap_cache/
+
 # Local config overrides
 .env
 *.local.yaml
